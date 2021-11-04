@@ -417,9 +417,6 @@ class CS:
         side : str
             'LHS' or 'RHS' to indicate which side of the reaction to return.
 
-        cs : :class:`.CS` or :class:`.CustomCS`
-            A nepc cross section.
-
         Returns
         -------
         : str
@@ -486,6 +483,102 @@ class CS:
         self.reaction_abbrev = " -> ".join([lhs_text_abbrev, rhs_text_abbrev])
         self.reaction_full = " -> ".join([lhs_text_full, rhs_text_full])
         return self.reaction_abbrev, self.reaction_full
+
+    def reaction_latex_lhs(self, side):
+        """Return the LaTeX for the LHS of the process involved in a nepc cross section.
+        Parameters
+        ----------
+        side : str
+            'LHS' or 'RHS' to indicate which side of the reaction to return.
+
+        Returns
+        -------
+        : str
+            The LaTeX for the LHS of the process involved in a NEPC cross section.
+        """
+        # FIXME: move this method to the CS Class
+        # FIXME: allow for varying electrons and including hv, v, j on rhs and lhs
+        # FIXME: decide how to represent total cross sections and implement
+        keys = {'LHS': {'e': 'e_on_lhs',
+                        'sideA': 'lhsA_long',
+                        'sideB': 'lhsB_long',
+                        'side_v': 'lhs_v'},
+                'RHS': {'e': 'e_on_rhs',
+                        'sideA': 'rhsA_long',
+                        'sideB': 'rhsB_long',
+                        'side_v': 'rhs_v'}
+                }
+
+        e_on_lhs = self.metadata['e_on_lhs']
+        if e_on_lhs == 0:
+            lhs_e_text = None
+        elif e_on_lhs == 1:
+            lhs_e_text = "e$^-$"
+        else:
+            lhs_e_text = str(e_on_lhs) + "e$^-$"
+
+        lhsA_text = self.metadata['lhsA_long']
+        if self.metadata['process'] == 'excitation_v':
+            lhsA_text = lhsA_text.replace(")", " v=" + str(self.metadata['lhs_v']) + ")")
+        lhsB_text = self.metadata['lhsB_long']
+        lhs_items = [lhs_e_text,
+                    lhsA_text,
+                    lhsB_text]
+        lhs_text = " + ".join(item for item in lhs_items if item)
+
+        return lhs_text
+
+    def reaction_latex_rhs(self):
+        """Return the LaTeX for the RHS of the process involved in a nepc cross section.
+        Parameters
+        ----------
+        cs : :class:`.CS` or :class:`.CustomCS`
+            A nepc cross section.
+        Returns
+        -------
+        : str
+            The LaTeX for the RHS of the process involved in a NEPC cross section.
+        """
+        # FIXME: move this method to the CS Class
+        # FIXME: allow for varying electrons and including hv, v, j on rhs and lhs
+        # FIXME: decide how to represent total cross sections and implement
+        e_on_rhs = self.metadata['e_on_rhs']
+        if e_on_rhs == 0:
+            rhs_e_text = None
+        elif e_on_rhs == 1:
+            rhs_e_text = "e$^-$"
+        else:
+            rhs_e_text = str(e_on_rhs) + "e$^-$"
+
+        rhsA_text = self.metadata['rhsA_long']
+        if self.metadata['process'] == 'excitation_v':
+            rhsA_text = rhsA_text.replace(")", " v=" + str(self.metadata['rhs_v']) + ")")
+        rhsB_text = self.metadata['rhsB_long']
+        rhs_items = [rhsA_text,
+                    rhsB_text,
+                    rhs_e_text]
+        rhs_text = " + ".join(item for item in rhs_items if item)
+
+        return rhs_text
+
+    def reaction_latex(self):
+        """Return the LaTeX for the process involved in a nepc cross section.
+        Parameters
+        ----------
+        cs : :class:`.CS` or :class:`.CustomCS`
+            A nepc cross section.
+        Returns
+        -------
+        : str
+            The LaTeX for the process involved in a NEPC cross section.
+        """
+        # FIXME: move this method to the CS Class
+        # FIXME: allow for varying electrons and including hv, v, j on rhs and lhs
+        # FIXME: decide how to represent total cross sections and implement
+        lhs_text = self.reaction_latex_lhs(self)
+        rhs_text = self.reaction_latex_rhs(self)
+        reaction = " $\\rightarrow$ ".join([lhs_text, rhs_text])
+        return reaction
 
     def plot(self, units_sigma=1E-20, plot_param_dict={'linewidth': 1},
              xlim_param_dict={'auto': True}, ylim_param_dict={'auto': True},
